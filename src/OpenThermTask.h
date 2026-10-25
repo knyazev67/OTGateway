@@ -1329,7 +1329,7 @@ protected:
     // Set heating temp
     {
       // Target heating temp
-      const float targetTemp = this->getSlaveChannelSetpoint(
+      if (!settings.opentherm.options.nativeOTC) {
         vars.master.heating.enabled,
         settings.opentherm.options.nativeOTC
           ? vars.master.heating.targetTemp
