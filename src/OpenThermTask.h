@@ -1326,7 +1326,7 @@ protected:
       }
     }
 
-    // Set heating temp
+         // Set heating temp
     {
       // Target heating temp
       const float targetTemp = this->getSlaveChannelSetpoint(
@@ -1337,56 +1337,42 @@ protected:
         settings.opentherm.heatingDisablingAction
       );
 
-      // Если nativeOTC АКТИВИРОВАН, мы НЕ передаем targetTemp в котел
-      if (settings.opentherm.options.nativeOTC) {
-        Log.snoticeln(L_OT_HEATING, "NativeOTC is active. Skipping room target temp transmission to heating loop.");
-      }
-      else {
-        // Если nativeOTC ВЫКЛЮЧЕН, работаем как обычно — передаем значение
-        if (this->setHeatingSetpoint(targetTemp)) {
-          Log.snoticeln(
-            L_OT_HEATING, "Set temp: %.2f (response: %.2f)",
-            targetTemp, vars.slave.heating.setpointTemp
-          );
-        } else {
-          Log.swarningln(
-            L_OT_HEATING, "Failed set temp: %.2f (response: %.2f)",
-            targetTemp, vars.slave.heating.setpointTemp
-          );
-        }
-      }
-    }
       // Converted target heating temp
       const float convertedTemp = this->convertSetpointTemp(targetTemp);
 
-      if (this->needSetHeatingTemp(convertedTemp)) {
-        // Set max heating temp
-        if (settings.opentherm.options.maxTempSyncWithTargetTemp) {
-          if (this->setMaxHeatingTemp(convertedTemp)) {
+      // ИСПРАВЛЕНИЕ: Если nativeOTC АКТИВИРОВАН, мы полностью пропускаем отправку температур в котел
+      if (settings.opentherm.options.nativeOTC) {
+        Log.snoticeln(L_OT_HEATING, "NativeOTC is active. Skipping max/target heating temp transmission to loop.");
+      } 
+      else {
+        // Если nativeOTC ВЫКЛЮЧЕН, шлюз работает в штатном режиме
+        if (this->needSetHeatingTemp(convertedTemp)) {
+          // Set max heating temp
+          if (settings.opentherm.options.maxTempSyncWithTargetTemp) {
+            if (this->setMaxHeatingTemp(convertedTemp)) {
+              Log.sinfoln(
+                L_OT_HEATING, "Set max heating temp: %.2f (converted: %.2f)",
+                targetTemp, convertedTemp
+              );
+            } else {
+              Log.swarningln(
+                L_OT_HEATING, "Failed set max heating temp: %.2f (converted: %.2f)",
+                targetTemp, convertedTemp
+              );
+            }
+          }//конец тут
+
+          // Set target heating temp
+          if (this->setHeatingTemp(convertedTemp)) {
+            this->heatingSetTempTime = millis();
+
             Log.sinfoln(
-              L_OT_HEATING, "Set max heating temp: %.2f (converted: %.2f)",
-              targetTemp, convertedTemp
+              L_OT_HEATING, "Set target temp: %.2f (converted: %.2f, response: %.2f)",
+              targetTemp, convertedTemp, vars.slave.heating.targetTemp
             );
-
           } else {
-            Log.swarningln(
-              L_OT_HEATING, "Failed set max heating temp: %.2f (converted: %.2f)",
-              targetTemp, convertedTemp
-            );
+            Log.swarningln(L_OT_HEATING, "Failed set target temp");
           }
-        }
-
-        // Set target heating temp
-        if (this->setHeatingTemp(convertedTemp)) {
-          this->heatingSetTempTime = millis();
-
-          Log.sinfoln(
-            L_OT_HEATING, "Set target temp: %.2f (converted: %.2f, response: %.2f)",
-            targetTemp, convertedTemp, vars.slave.heating.targetTemp
-          );
-
-        } else {
-          Log.swarningln(L_OT_HEATING, "Failed set target temp");
         }
       }
     }
