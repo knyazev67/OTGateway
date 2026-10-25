@@ -1326,7 +1326,7 @@ protected:
       }
     }
 
-// Set heating temp
+    // Set heating temp
     {
       // Target heating temp
       const float targetTemp = this->getSlaveChannelSetpoint(
@@ -1340,7 +1340,7 @@ protected:
       // Если nativeOTC АКТИВИРОВАН, мы НЕ передаем targetTemp в котел
       if (settings.opentherm.options.nativeOTC) {
         Log.snoticeln(L_OT_HEATING, "NativeOTC is active. Skipping room target temp transmission to heating loop.");
-      } 
+      }
       else {
         // Если nativeOTC ВЫКЛЮЧЕН, работаем как обычно — передаем значение
         if (this->setHeatingSetpoint(targetTemp)) {
@@ -1355,7 +1355,7 @@ protected:
           );
         }
       }
-    } // <- Обратите внимание! Здесь должна быть ОДНА закрывающая скобка блока, а не две или три
+    }
       // Converted target heating temp
       const float convertedTemp = this->convertSetpointTemp(targetTemp);
 
