@@ -1340,7 +1340,7 @@ protected:
       // ИСПРАВЛЕНИЕ: Если nativeOTC АКТИВИРОВАН, мы НЕ передаем targetTemp в котел
       if (settings.opentherm.options.nativeOTC) {
         Log.snoticeln(L_OT_HEATING, "NativeOTC is active. Skipping room target temp transmission to heating loop.");
-      } 
+      }
       else {
         // Если nativeOTC ВЫКЛЮЧЕН, работаем как обычно — передаем значение
         if (this->setHeatingSetpoint(targetTemp)) {
